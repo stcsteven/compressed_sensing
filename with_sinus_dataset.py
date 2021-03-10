@@ -1,4 +1,5 @@
 # Suppplementary library
+import os
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -11,9 +12,9 @@ from helper.framework import *
 from helper.statistics import *
 
 number_of_elements = 1000
-noise_mean = 0
-noise_sd = 0
-sample = 100
+sample = int(number_of_elements * 0.3)
+noise_mean = 1.
+noise_sd = 0.
 
 # Generate signal
 def generate_signal_and_sample():    
@@ -33,13 +34,10 @@ def sampling(t, signal):
 
 # Reconstruction
 def calculate(idxs, y_sample):
-    # create idct matrix operator
     A = spfft.idct(np.identity(number_of_elements), norm='ortho', axis=0)
     A = A[idxs]
     
-    # # do L1 optimization
     vx = cvx.Variable(number_of_elements)
-
     objective = cvx.Minimize(cvx.norm(vx, 1))
     constraints = [A*vx == y_sample]
     prob = cvx.Problem(objective, constraints)
@@ -52,14 +50,18 @@ def calculate(idxs, y_sample):
 
 # Evaluation
 def evaluation(t, signal, reconstructed_signal, idx_sample, y_sample):
-    snr = calculate_snr(signal, 0, ddof=0)
-    figure_description = "SNR: " + str(snr)
-    figure_subtitle = "Noise Mean: "+ str(noise_mean) + "; Noise SD: "+ str(noise_sd)
+    snr = calculate_snr(signal, 0, ddof=sample-1)
+    figure_description = "Number of Elements: " + str(number_of_elements) +" // Samples: "+ str(sample) +"\nNoise Mean: "+ str(noise_mean) + " // Noise Standard Deviation: "+ str(noise_sd) +"\nSNR: " + str(snr)
     fig, axs = plt.subplots(3)
     fig.suptitle(figure_description)
+    fig.tight_layout(pad=1.25)
+    axs[0].set_title('original')
     axs[0].plot(t, signal)
+    axs[1].set_title('sample')
     axs[1].plot(idx_sample, y_sample, 'rx')
+    axs[2].set_title('reconstructed')
     axs[2].plot(t, reconstructed_signal)
+
     plt.show()
 
 # Main Function
