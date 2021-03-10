@@ -13,7 +13,7 @@ from helper.statistics import *
 
 number_of_elements = 1000
 sample = int(number_of_elements * 0.3)
-noise_mean = 1.
+noise_mean = 0.
 noise_sd = 0.
 
 # Generate signal
